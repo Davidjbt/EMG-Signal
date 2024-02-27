@@ -1,13 +1,14 @@
 import os
 
 import pandas as pd
+import numpy as np
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 
 def extract_features_from_entry(values):
-    return sum(values), 2
+    return np.sqrt(np.mean(values**2)), np.mean(abs(values)), np.sum(values**2), np.sum(abs(values))
 
 def get_feature_matrix():
 
@@ -18,7 +19,7 @@ def get_feature_matrix():
         row = list(extract_features_from_entry(values)) + [label]
         rows.append(row)
 
-    return pd.DataFrame(rows, columns=['sum', '1', 'label'])
+    return pd.DataFrame(rows, columns=['RMS', 'MAV', 'SSI', 'IEMG'])
 
 feature_matrix = get_feature_matrix()
 
