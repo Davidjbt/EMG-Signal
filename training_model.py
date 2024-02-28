@@ -14,7 +14,7 @@ def get_feature_matrix():
 
     rows = []
     for filename in os.listdir('./entries'):
-        values = pd.read_csv(f'./entries/{filename}').iloc[:,1]
+        values = pd.read_csv(f'./entries/{filename}').iloc[:,1:]
         label = int(filename[0])
         row = list(extract_features_from_entry(values)) + [label]
         rows.append(row)
