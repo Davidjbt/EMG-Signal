@@ -7,8 +7,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 
+
 def extract_features_from_entry(values):
     return np.sqrt(np.mean(values**2)), np.mean(abs(values)), np.sum(values**2), np.sum(abs(values))
+
 
 def get_feature_matrix():
 
@@ -20,6 +22,7 @@ def get_feature_matrix():
         rows.append(row)
 
     return pd.DataFrame(rows, columns=['RMS', 'MAV', 'SSI', 'IEMG'])
+
 
 feature_matrix = get_feature_matrix()
 
