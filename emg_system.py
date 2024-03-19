@@ -19,9 +19,11 @@ while True:
         print(f'Arr = {emg_1}')
         c = OVERLAP
         first = False
+
+        wl = np.sum(np.abs(np.abs(emg_1[0, :])))
+
+
         emg_1 = np.roll(emg_1, OVERLAP, axis=1)
-
-
 
     else:
         c = c + 1
