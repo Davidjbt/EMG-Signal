@@ -7,6 +7,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 
+WINDOW_SIZE = 10
+NUM_OF_SENSORS = 2
+OVERLAP = int(WINDOW_SIZE / 2)
+THRESHOLD = 220
+
 
 def extract_features_from_entry(values):
     return np.sqrt(np.mean(values**2)), np.mean(abs(values)), np.sum(values**2), np.sum(abs(values))
@@ -16,10 +21,28 @@ def get_feature_matrix():
 
     rows = []
     for filename in os.listdir('./entries'):
-        values = pd.read_csv(f'./entries/{filename}').iloc[:,1:]
+        values = pd.read_csv(f'./entries/{filename}').iloc[:, 1:]
         label = int(filename[0])
-        row = list(extract_features_from_entry(values)) + [label]
-        rows.append(row)
+
+        c = 0
+        first = True
+        emg_raw = np.zeros((NUM_OF_SENSORS, WINDOW_SIZE))
+
+        for _, row in values.iterrows():
+            emg_raw[:, c] = row
+
+            if (c == WINDOW_SIZE - 1 and first) or (c == OVERLAP + 1 and not first):
+                c = OVERLAP
+                first = False
+
+                emg_raw = np.roll(emg_raw, OVERLAP, axis=1)
+                wl = np.sum(np.abs(np.abs(emg_raw[0, :])))
+
+                if wl > THRESHOLD:
+                    row = list(extract_features_from_entry(values)) + [label]
+                    rows.append(row)
+            else:
+                c = c + 1
 
     return pd.DataFrame(rows, columns=['RMS', 'MAV', 'SSI', 'IEMG'])
 
