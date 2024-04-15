@@ -3,9 +3,13 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn import svm
+from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
+
+from micromlgen import port
+
 
 WINDOW_SIZE = 10
 NUM_OF_SENSORS = 2
@@ -14,7 +18,14 @@ THRESHOLD = 220
 
 
 def extract_features_from_entry(values):
-    return np.sqrt(np.mean(values**2)), np.mean(abs(values)), np.sum(values**2), np.sum(abs(values))
+    n = np.array([])
+
+    for row in values:
+        v = np.sqrt(np.mean(row ** 2)), np.mean(abs(row)), np.sum(row ** 2), np.sum(abs(row))
+        v = list(v)
+        n = np.hstack((n, np.array(v)))
+
+    return n
 
 
 def get_feature_matrix():
@@ -39,12 +50,15 @@ def get_feature_matrix():
                 wl = np.sum(np.abs(np.abs(emg_raw[0, :])))
 
                 if wl > THRESHOLD:
-                    row = list(extract_features_from_entry(values)) + [label]
+                    row = list(extract_features_from_entry(emg_raw)) + [label]
                     rows.append(row)
             else:
                 c = c + 1
 
-    return pd.DataFrame(rows, columns=['RMS', 'MAV', 'SSI', 'IEMG'])
+        columns = ['RMS', 'MAV', 'SSI', 'IEMG']
+        columns = [f"{item}_{i}" for i in range(1, NUM_OF_SENSORS + 1) for item in columns] + ['label']
+
+    return pd.DataFrame(rows, columns=columns)
 
 
 feature_matrix = get_feature_matrix()
@@ -70,9 +84,7 @@ y_pred = clf.predict(X_test)
 # Evaluate the accuracy of the SVM model on the testing set
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
-import joblib
-# Save the trained SVM model
-joblib.dump(clf, 'svm_model.joblib')
 
-# Save the LabelEncoder
-joblib.dump(encoder, 'label_encoder.joblib')
+with open('./SVMClassifier/SVMClassifier.h', 'w') as file:
+    file.write(port(clf))
+
