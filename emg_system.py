@@ -1,9 +1,9 @@
 import numpy as np
 
-WINDOW_SIZE = 10
+WINDOW_SIZE = 150
 NUM_OF_SENSORS = 4
 OVERLAP = int(WINDOW_SIZE / 2)
-THRESHOLD = 10
+THRESHOLD = 560
 
 c = 0
 first = True
@@ -25,7 +25,14 @@ while True:
         wl = np.sum(np.abs(np.abs(emg_1[0, :])))
 
         if wl > THRESHOLD:
-            pass
+            x = np.array([])
+
+            for row in emg_1:
+                v = np.sqrt(np.mean(row ** 2)), np.mean(abs(row)), np.sum(row ** 2), np.sum(abs(row))
+                v = list(v)
+                x = np.hstack((x, np.array(v)))
+
+            # prediction = model(X)
 
     else:
         c = c + 1

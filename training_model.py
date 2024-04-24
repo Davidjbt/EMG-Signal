@@ -3,18 +3,16 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn import svm
-from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
-
 from micromlgen import port
 
-
-WINDOW_SIZE = 10
-NUM_OF_SENSORS = 2
+WINDOW_SIZE = 150
+NUM_OF_SENSORS = 4
 OVERLAP = int(WINDOW_SIZE / 2)
-THRESHOLD = 220
+THRESHOLD = 560
+ENTRIES_FOLDER = './entries_classification_3'
 
 
 def extract_features_from_entry(values):
@@ -31,8 +29,9 @@ def extract_features_from_entry(values):
 def get_feature_matrix():
 
     rows = []
-    for filename in os.listdir('./entries'):
-        values = pd.read_csv(f'./entries/{filename}').iloc[:, 1:]
+    for filename in os.listdir(ENTRIES_FOLDER):
+        print(filename)
+        values = pd.read_csv(f'{ENTRIES_FOLDER}/{filename}').iloc[:, 1:]
         label = int(filename[0])
 
         c = 0
@@ -63,6 +62,8 @@ def get_feature_matrix():
 
 feature_matrix = get_feature_matrix()
 
+print(feature_matrix)
+
 X = feature_matrix.iloc[:, :-1].values
 Y = feature_matrix['label'].values
 
@@ -85,6 +86,7 @@ y_pred = clf.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 
-with open('./SVMClassifier/SVMClassifier.h', 'w') as file:
+with open('SVMClassifier.h', 'w') as file:
     file.write(port(clf))
 
+print('Finish')
